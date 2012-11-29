@@ -3,7 +3,9 @@
 
 module MaliciousTempC {
 	uses interface Boot;
+	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
+	uses interface Timer<TMilli> as Timer1;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
@@ -31,7 +33,9 @@ implementation {
 	}
 
 	event void Timer0.fired() {
-		seqNO++;  //increment the seqNO everytime a packet is sent
+		seqNO++;  				//increment the seqNO everytime a packet is sent
+		call Leds.set(7); 			//turn on all the LEDS when a packet it sent
+		call Timer1.startOneShot(2000);  //keep the leds on for 2 seconds
 		if (!busy) {
 			MaliciousTempMsg* btrpkt = (MaliciousTempMsg*)(call Packet.getPayload(&pkt, sizeof (MaliciousTempMsg)));
 			btrpkt->nodeid = TOS_NODE_ID;
@@ -47,6 +51,12 @@ implementation {
 			  busy = TRUE;
 			}
 		}
+		
+	}
+	
+	event void Timer1.fired() {
+		//when timer expires turn the LEDS off
+		call Leds.set(0); 
 	}
 	
 	event void AMSend.sendDone(message_t* msg, error_t error) {

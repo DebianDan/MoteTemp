@@ -27,3 +27,11 @@ Because it was hard to capture the Blinking LEDs in a picture for proof it is ea
 	-This is because when the mote was RESET the counter started again back at 0.
 4)Another test was to take the motes out of range of each other where they both paused and displayed the LEDs they last had without changing
 	-When brought back it range so their radios could communicate the LEDs began changing again
+
+***************MAKEFILE FLAGS***************
+
+-DCC2420_DEF_CHANNEL=20
+	Specifies the Operating Channel of the Mote between [13-26]
+
+-DCC2420_DEF_RFPOWER=30
+	Specifies the RF Power of transmission of the Mote between [3-31]

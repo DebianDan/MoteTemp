@@ -39,8 +39,7 @@ implementation {
 			MaliciousTempMsg* btrpkt = (MaliciousTempMsg*)(call Packet.getPayload(&pkt, sizeof (MaliciousTempMsg)));
 			btrpkt->nodeid = TOS_NODE_ID;
 			btrpkt->counter = counter;
-			if (call AMSend.send(1, &pkt, 
-sizeof(MaliciousTempMsg)) == SUCCESS) 
+			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(MaliciousTempMsg)) == SUCCESS) 
 {
 			  busy = TRUE;
 			}

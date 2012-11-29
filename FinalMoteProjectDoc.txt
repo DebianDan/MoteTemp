@@ -89,7 +89,7 @@
 	-If the other BaseStation recieves the packet we confirm that Send() is working
 		-
 	
-**Not Sure If Needed**	
+**Need to Define a Message Format**	
 8)Create a program that Constructs a packet and sends it to another node
 	-Run BaseStation to see if the packet was successfully sent
 	-Match the structure to that of the real packets that were captured from the network

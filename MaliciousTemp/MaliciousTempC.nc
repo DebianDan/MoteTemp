@@ -3,16 +3,14 @@
 
 module MaliciousTempC {
 	uses interface Boot;
-	uses interface Leds;
 	uses interface Timer<TMilli> as Timer0;
 	uses interface Packet;
 	uses interface AMPacket;
 	uses interface AMSend;
 	uses interface SplitControl as AMControl;
-	uses interface Receive;
 }
 implementation {
-	uint16_t counter = 0;
+	uint32_t seqNO = 1;   //Start the Sequence number at 1
 	bool busy = FALSE;
 	message_t pkt;
 
@@ -33,14 +31,19 @@ implementation {
 	}
 
 	event void Timer0.fired() {
-		counter++;
-		//call Leds.set(counter);
+		seqNO++;  //increment the seqNO everytime a packet is sent
 		if (!busy) {
 			MaliciousTempMsg* btrpkt = (MaliciousTempMsg*)(call Packet.getPayload(&pkt, sizeof (MaliciousTempMsg)));
 			btrpkt->nodeid = TOS_NODE_ID;
-			btrpkt->counter = counter;
+			btrpkt->seqNO = seqNO;						
+			btrpkt->counter1 = 0x817;
+			btrpkt->counter2 = 0x3;
+			btrpkt->counter3 = 0x726;
+			btrpkt->msgrate = 0x384;
+			btrpkt->light = 0x12;
+			
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(MaliciousTempMsg)) == SUCCESS) 
-{
+			{
 			  busy = TRUE;
 			}
 		}
@@ -50,14 +53,6 @@ implementation {
 		if (&pkt == msg) {
 			busy = FALSE;
 		}
-	}
-	
-	event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len) {
-		if (len == sizeof(MaliciousTempMsg)) {
-			MaliciousTempMsg* btrpkt = (MaliciousTempMsg*)payload;
-			call Leds.set(btrpkt->counter);
-		}
-		return msg;
 	}
 	
 }

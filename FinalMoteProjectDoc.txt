@@ -82,29 +82,74 @@ Network Security 5473
 	-Found the correct Channel at 20!
 	-Starting receiving packets from various sensors
 
-**Jeremy**	
-7)Identify the Message Structure
-	-Destination Address
-	-Payload
-		
-**Trying to use java net.tinyos.tools.Send**	
-8)Send a packet from a BaseStation on Channel=21 and see if another BaseStation on Channel=21 will receive it
-	-Had to set "export MOTECOM=serial@/dev/ttyUSB0"
-	-Sent a packet, in byte form, that was recieved from the "working temperature nodes"
-	-If the other BaseStation recieves the packet we confirm that Send() is working
-		-
+
 	
-**Need to Define a Message Format**	
-8)Create a program that Constructs a packet and sends it to another node
+7)Identify the Message Structure
+	-Dump from 483
+		-00 FF FF 01 E3 14 00 03 01 E3 00 00 00 6B 00 00 08 17 00 03 07 26 00 00 03 84 00 12
+
+	00 		- AM Packet
+	FF FF 	- AM_BROADCAST_ADDR
+	01 E3	- Source Address (483) set by make telosb install,483
+	14 		- Message Length
+	00 03   - AM_CHANNEL defines a "logical" channel the motes are communicating on.  Set by AM_MALICIOUSTEMP in MaliciousTemp.h 
+	01 E3	- Link Source Address (483) same as Source Address
+
+	REST IS PAYLOAD
+
+	00 00 00 6B - SeqNo Starts at 1 and increments each packet
+	00 00 08 17 - Counter1 Hardcoded at 0x817 (Don't know what this represents)*
+	00 03		- Counter2 Hardcoded at 0x3 (Don't know what this represents)*
+	07 26 		- Counter3 Hardcoded at 0x726 (Don't know what this represents)*
+	00 00 03 84 - Message Rate (Default 900)
+	00 12		- Light value
+
+
+	MESSAGE STRUCT
+	typedef nx_struct MaliciousTempMsg {
+	  nx_uint16_t nodeid;
+	  nx_uint32_t seqNO;
+	  nx_uint32_t counter1;
+	  nx_uint16_t counter2;
+	  nx_uint16_t counter3;
+	  nx_uint32_t msgrate;
+	  nx_uint16_t light;
+	} MaliciousTempMsg;
+
+
+		
+8)Send a packet from a BaseStation on Channel=20 and see if peoplenet website will receive it
+	-Had to set "export MOTECOM=serial@/dev/ttyUSB0"
+	-Sent a packet, in byte form, that was captured from the "working temperature nodes"
+ Result: 	Successfully used java net.tinyos.tools.Send to REsend captured packet
+			Verified result on http://peoplenet.cse.ohio-state.edu/peoplenet/projects/TempSense/TempSense.php
+	
+8)Create a program that Constructs malicious packets and sends out on AM_BROADCAST_ADDR
 	-Run BaseStation to see if the packet was successfully sent
 	-Match the structure to that of the real packets that were captured from the network
 	
+	MESSAGE STRUCT
+	typedef nx_struct MaliciousTempMsg {
+	  nx_uint16_t nodeid;
+	  nx_uint32_t seqNO;
+	  nx_uint32_t counter1;
+	  nx_uint16_t counter2;
+	  nx_uint16_t counter3;
+	  nx_uint32_t msgrate;
+	  nx_uint16_t light;
+	} MaliciousTempMsg;
+	
+	-Counters 1, 2, and 3 are still unknown
+ Result:	Defined a Message Format and got the node to successfully inject a packet
+			at whatever Message Rate we desire
+	
 9)Send the crafted packet with false temperature data
 	-Verify that the network received it
-		-http://peoplenet.cse.ohio-state.edu/peoplenet/projects/TempSense/TempSense.php'
+		-http://peoplenet.cse.ohio-state.edu/peoplenet/projects/TempSense/TempSense.php
 		-Check that the room recevied the malicous temperature packet
 		
-		
+ Result:	Attack was successfully completed!
+			With the ability to change all of the fields on the website!
 		
 	
 

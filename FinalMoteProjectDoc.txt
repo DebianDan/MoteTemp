@@ -1,4 +1,9 @@
-	*****TestBench Timeline*****
+Author: Dan Tucholski
+November 28, 2012
+
+Network Security 5473
+
+*****TestBench Timeline*****
 
 1)TinyOs Installation via VmPlayer
 	-http://docs.tinyos.net/tinywiki/index.php/Getting_started

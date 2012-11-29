@@ -1,0 +1,159 @@
+	*****TestBench Timeline*****
+
+1)TinyOs Installation via VmPlayer
+	-http://docs.tinyos.net/tinywiki/index.php/Getting_started
+		-http://docs.tinyos.net/tinywiki/index.php/Running_a_XubunTOS_Virtual_Machine_Image_in_VMware_Player#Windows_VMware_Player_Installation
+	
+2)Mote-to-Mote Communication
+	-http://docs.tinyos.net/tinywiki/index.php/Mote-mote_radio_communication
+	-Rewrote BlinkToRadio to Establish Communication between 2 motes
+	-First established communication on AM_BROADCAST_ADDR channel
+		-The packet is sent to all nodes in radio range by specyfing AM_BROADCAST_ADDR as the destination address
+	-Refined to so that each node has an id and sends to eachother
+		-Node 2 : call AMSend.send(3, &pkt, sizeof(BlinkToRadioMsg))
+		-Node 3 : call AMSend.send(2, &pkt, sizeof(BlinkToRadioMsg))
+ -Result: 	Both motes are communicating directly by their node IDs
+			Successfully displaying the three least significant bits of the counter on eachothers LEDs 
+
+3)BaseStation Installed on Node 0 and BlinkToRadio on Node 1
+	-Made all of the Java Tools within TinyOs
+		-Make /opt/tinyos.2.1.0/support/sdk/java
+			-Make all the directories to make the tools
+	-Researched the Listen Command to forward packets from the BaseStation to the PC through the USB
+		-Run java net.tinyos.tools.Listen -comm serial@/dev/ttyUSB0:telos
+	-Node 1 was broadcasting to AM_BROADCAST_ADDR on default Channel 26 and default Group ID 0x22
+		-This was just a test to see if BaseStation was operating properly
+		-New test to make Node 1 send to a specific Node ID and see if BaseStation can capture the packet
+	-Refined the code of Node 1 : call AMSend.send(3, &pkt, sizeof(BlinkToRadioMsg))
+		-Node 1 was now broadcasting to 3, but it was still on default Channel 26 and default Group ID 0x22
+		
+ -Result:	BaseStation was confirmed to work on the Default Channel 26 with the Default Group ID 0x22
+			A Packet Sniffer was created to dump the raw hex of the packet
+			Example Packet Below:
+			
+			dest addr 	link source addr 	msg len 	groupID 	handlerID 	source addr 	counter
+			ff ff 		00 00 				04 			22 			06 			00 02 			00 0B 
+
+4)Motes Communicating Node 1 on Channel 15 and Node 2 on Channel 26
+	-Used Modified BlinkToRadio to Establish Communication between 2 motes
+	-Added "CFLAGS += -DCC2420_DEF_CHANNEL=15" to the Makefile then installed on Node 1
+	-Added "CFLAGS += -DCC2420_DEF_CHANNEL=26" to the Makefile then installed on Node 1
+		-Proof of Concept: There should be no communication between the 2 motes
+			-Thier LEDs were NOT be blinking
+	
+	-Changed Node 2 to be communicating on CHANNEL=15
+		-They now are both communicating on channel 15 instead of the Default of 26
+		
+ -Result:	Proved that the motes would not communicate cross channel
+			Proved that motes only can communicate if they are on the same channel
+			Motivates us to scan all channels [13-26] for the temperature packet
+		
+			
+5)BaseStation Installed on CHANNEL=26 and BlinkToRadio on CHANNEL=15
+	-BaseStation should not be recieving any packets since it is on the wrong operating channel
+		-It did not see that there were any packets
+		-This is the same behavior that we discovered when we were trying to capture a packet outside of room 286
+		-This leads us to conclude that we are on the wrong operating channel
+	
+	-Changed BaseStation to be on CHANNEL=15
+		-BaseStation now is recieving packets from the other Node on CHANNEL=15
+		
+ -Result:	Proved that the BaseStation would not communicate cross channel
+			Proved that BaseStation only can communicate if they are on the same channel
+			Motivates us to scan all channels [13-26] to find the correct operating channel
+			
+6)Scan channels [13-26] to find operating channel of the sensor network
+	-Channels are in the range of [13-26]
+		-http://mail.millennium.berkeley.edu/pipermail/tinyos-help/2012-February/054095.html
+	-Since the motes transmit a packet only once every 15 minutes
+		-Must wait 15 to change the operating channel
+	-Procedure is as follows: Every 15 minutes
+		-install BaseStation with a new Channel
+		-run java net.tinyos.tools.Listen -comm serial@/dev/ttyUSB0:telos
+			-which starts logging any packets that are captured on that Channel
+		-if no packets are captured within 15 minutes then restart the above steps on a new Channel
+	-Repeat this until a packet is catured which confirms the Operating Channel of the network
+	-Tried it on Channels 13,14,15,16,17,18,19
+	-Found the correct Channel at 20!
+	-Starting receiving packets from various sensors
+
+**Jeremy**	
+7)Identify the Message Structure
+	-Destination Address
+	-Payload
+		
+**Trying to use java net.tinyos.tools.Send**	
+8)Send a packet from a BaseStation on Channel=21 and see if another BaseStation on Channel=21 will receive it
+	-Had to set "export MOTECOM=serial@/dev/ttyUSB0"
+	-Sent a packet, in byte form, that was recieved from the "working temperature nodes"
+	-If the other BaseStation recieves the packet we confirm that Send() is working
+		-
+	
+**Not Sure If Needed**	
+8)Create a program that Constructs a packet and sends it to another node
+	-Run BaseStation to see if the packet was successfully sent
+	-Match the structure to that of the real packets that were captured from the network
+	
+9)Send the crafted packet with false temperature data
+	-Verify that the network received it
+		-http://peoplenet.cse.ohio-state.edu/peoplenet/projects/TempSense/TempSense.php'
+		-Check that the room recevied the malicous temperature packet
+		
+		
+		
+	
+
+	
+*****References*****
+
+Change Group ID in Command Line
+	-DEFAULT_LOCAL_GROUP=0x05 make telosb install ...
+
+Packet Structure 
+	-http://docs.tinyos.net/tinywiki/index.php/Mote-PC_serial_communication_and_SerialForwarder
+
+Setting the Channel
+	-Method 1 by adding "CFLAGS += -DCC2420_DEF_CHANNEL=25" to the Makefile
+	-http://prasanthprabalan.blogspot.com/2012/07/select-channel-for-transmittion-in.html
+	
+Setting the RF power [3-31]
+	CFLAGS += -DCC2420_DEF_RFPOWER=<your_power>
+			
+Packet Sniffer Reference from Tinyos1.x
+	-http://digitalcommons.unl.edu/cgi/viewcontent.cgi?article=1004&context=usnavyresearch
+	-a TinyOS sniffer can simply be a mote programmed with a node address of 0, and an application that ignores the group ID and AM fields
+	
+-Refinements for Tinyos.2.1.0 are that there no longer needs to be a modifaction for the radio to recieve all CC2420 radio traffic
+	-In the older version BaseStation used to filter out CC2420 packets that were not addressed to the BaseStation
+		-BaseStation limitations with the cc2420 radio, must use BaseStationCC2420
+		-http://mail.millennium.berkeley.edu/pipermail/tinyos-2-commits/2006-October/004401.html
+	(ABOVE IS DEPRECATED)	
+	-Newest BaseStation shouldnt have limitations
+		-http://mail.millennium.berkeley.edu/pipermail/tinyos-help/2007-August/027542.html
+
+-Default cc2420 channel is 26
+	-http://www.tinyos.net/dist-2.0.0/tinyos-2.x/doc/html/tutorial/lesson13.html
+
+-Setting channel number in the range [13-26] also setting RF Power [3-31]
+	-http://mail.millennium.berkeley.edu/pipermail/tinyos-help/2012-February/054095.html
+	
+-The definition of the CC2420 message format can be found in tinyos-2.x/tos/chips/cc2420/CC2420.h
+	-http://www.tinyos.net/tinyos-2.x/doc/html/tep111.html
+
+
+	
+	
+TOPICS ANISH MIGHT ASK ABOUT
+	
+*****Security Implementations*****  
+
+-Slide 42: AES on CC2420
+	-http://www.cse.ohio-state.edu/~heji/TinyOSTutorial_Oct2012.pdf
+
+
+		
+		
+
+
+
+

@@ -148,6 +148,18 @@ Network Security 5473
 		-http://peoplenet.cse.ohio-state.edu/peoplenet/projects/TempSense/TempSense.php
 		-Check that the room recevied the malicous temperature packet
 		
+	-Dump of Sent Messages by the Malicious node
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 02 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 03 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 04 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 05 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 06 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 07 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 08 00 00 08 17 00 03 07 26 00 00 03 84 00 12 
+		00 FF FF 01 E3 14 00 03 01 E3 00 00 00 09 00 00 08 17 00 03 07 26 00 00 03 84 00 12
+	-Notice that the Sequence Number is increasing with each packet
+		-This is important so that the server doesn't detect a malicious packet
+		
  Result:	Attack was successfully completed!
 			With the ability to change all of the fields on the website!
 		

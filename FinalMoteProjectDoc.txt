@@ -88,19 +88,24 @@ Network Security 5473
 	-Dump from 483
 		-00 FF FF 01 E3 14 00 03 01 E3 00 00 00 6B 00 00 08 17 00 03 07 26 00 00 03 84 00 12
 
+	HEADER
+	
 	00 		- AM Packet
 	FF FF 	- AM_BROADCAST_ADDR
 	01 E3	- Source Address (483) set by make telosb install,483
 	14 		- Message Length
 	00 03   - AM_CHANNEL defines a "logical" channel the motes are communicating on.  Set by AM_MALICIOUSTEMP in MaliciousTemp.h 
-	01 E3	- Link Source Address (483) same as Source Address
+	
 
 	REST IS PAYLOAD
 
+	01 E3		- Link Source Address (483) same as Source Address
 	00 00 00 6B - SeqNo Starts at 1 and increments each packet
-	00 00 08 17 - Counter1 Hardcoded at 0x817 (Don't know what this represents)*
-	00 03		- Counter2 Hardcoded at 0x3 (Don't know what this represents)*
-	07 26 		- Counter3 Hardcoded at 0x726 (Don't know what this represents)*
+	00 00 		- cmdNO
+	08 17 		- voltage
+	07 BB		- Temperature (~71.6)
+	07 			- Transmit Power
+	26 			- groupID (Logically Filter)
 	00 00 03 84 - Message Rate (Default 900)
 	00 12		- Light value
 
@@ -109,9 +114,11 @@ Network Security 5473
 	typedef nx_struct MaliciousTempMsg {
 	  nx_uint16_t nodeid;
 	  nx_uint32_t seqNO;
-	  nx_uint32_t counter1;
-	  nx_uint16_t counter2;
-	  nx_uint16_t counter3;
+	  nx_uint16_t cmdNO;
+	  nx_uint16_t voltage;
+	  nx_uint16_t temp;
+	  nx_uint8_t power;
+	  nx_uint8_t groupID;
 	  nx_uint32_t msgrate;
 	  nx_uint16_t light;
 	} MaliciousTempMsg;

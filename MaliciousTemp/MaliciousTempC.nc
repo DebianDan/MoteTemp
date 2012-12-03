@@ -40,11 +40,13 @@ implementation {
 			MaliciousTempMsg* btrpkt = (MaliciousTempMsg*)(call Packet.getPayload(&pkt, sizeof (MaliciousTempMsg)));
 			btrpkt->nodeid = TOS_NODE_ID;
 			btrpkt->seqNO = seqNO;						
-			btrpkt->counter1 = 0x817;
-			btrpkt->counter2 = 0x3;
-			btrpkt->counter3 = 0x726;
-			btrpkt->msgrate = 0x384;
-			btrpkt->light = 0x12;
+			btrpkt->cmdNO = 99;
+			btrpkt->voltage = 0x7BB;
+			btrpkt->temp = 0x7BB;  //71.6 Farenheit
+			btrpkt->power = 25;
+			btrpkt->groupID = 0x26;
+			btrpkt->msgrate = 10;
+			btrpkt->light = 6;
 			
 			if (call AMSend.send(AM_BROADCAST_ADDR, &pkt, sizeof(MaliciousTempMsg)) == SUCCESS) 
 			{
